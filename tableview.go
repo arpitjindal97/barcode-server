@@ -1,14 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"github.com/therecipe/qt/core"
 )
 
 func init() { CustomTableModel_QmlRegisterType2("CustomQmlTypes", 1, 0, "CustomTableModel") }
 
 const (
-	ScanResults = int(core.Qt__UserRole) + 1<<iota
+	results = int(core.Qt__UserRole) + 1<<iota
 )
 
 type TableItem struct {
@@ -37,7 +36,7 @@ func (m *CustomTableModel) init() {
 
 func (m *CustomTableModel) roleNames() map[int]*core.QByteArray {
 	return map[int]*core.QByteArray{
-		ScanResults: core.NewQByteArray2("Scan Results", -1),
+		results: core.NewQByteArray2("results", -1),
 	}
 }
 
@@ -52,7 +51,7 @@ func (m *CustomTableModel) columnCount(*core.QModelIndex) int {
 func (m *CustomTableModel) data(index *core.QModelIndex, role int) *core.QVariant {
 	item := m.modelData[index.Row()]
 	switch role {
-	case ScanResults:
+	case results:
 		return core.NewQVariant14(item.ScanResult)
 	}
 	return core.NewQVariant()
@@ -68,9 +67,11 @@ func (m *CustomTableModel) remove() {
 }
 
 func (m *CustomTableModel) add(item TableItem) {
+
 	m.BeginInsertRows(core.NewQModelIndex(), len(m.modelData), len(m.modelData))
 	m.modelData = append(m.modelData, item)
 	m.EndInsertRows()
+
 }
 
 func (m *CustomTableModel) edit(index int, item TableItem) {
@@ -79,10 +80,26 @@ func (m *CustomTableModel) edit(index int, item TableItem) {
 	}
 	m.modelData[index] = item
 	m.DataChanged(m.Index(index, 0, core.NewQModelIndex()), m.Index(index, 1, core.NewQModelIndex()),
-		[]int{ScanResults})
+		[]int{results})
+}
+
+func (m *CustomTableModel) recieved(item TableItem) {
+
+	if len(m.modelData) == 14 {
+		m.modelData = m.modelData[1:]
+	}
+	m.modelData = append(m.modelData, item)
+
+	m.DataChanged(m.Index(0, 0, core.NewQModelIndex()), m.Index(len(m.modelData)-1, 0, core.NewQModelIndex()),
+		[]int{results})
+
 }
 
 func (m *CustomTableModel) start() {
-	//go StartProcess()
-	fmt.Println("start button clicked")
+
+	for i := 1; i <= 14; i++ {
+		m.add(TableItem{""})
+	}
+	m.modelData = []TableItem{}
+	go StartProcess(m)
 }

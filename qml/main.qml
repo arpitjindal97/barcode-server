@@ -56,7 +56,7 @@ Item {
                 x: 8
                 y: 8
                 width: 200
-                height: 258
+                height: 263
                 horizontalScrollBarPolicy: 2
                 // @disable-check M300
                 model: CustomTableModel{}
@@ -80,9 +80,9 @@ Item {
         Rectangle {
             id: rectangle4
             x: 0
-            y: 327
+            y: 332
             width: 400
-            height: 52
+            height: 47
             color: "#ffffff"
 
             Button {
