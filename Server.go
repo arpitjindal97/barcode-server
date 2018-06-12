@@ -60,6 +60,7 @@ func PrepareExcelFile() {
 	}
 	xlsx.NewSheet("Sheet2")
 	time.Sleep(time.Second * 1)
+	xlsx.SetCellValue("Sheet1", "A1", "some random text")
 	xlsx.DeleteSheet("Sheet1")
 	xlsx.SetSheetName("Sheet2", "Sheet1")
 	xlsx.Save()
