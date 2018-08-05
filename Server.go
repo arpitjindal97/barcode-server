@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/gorilla/mux"
@@ -22,8 +23,8 @@ func StartProcess(m *CustomTableModel) {
 
 	muxHttp := mux.NewRouter()
 
-	muxHttp.HandleFunc("/Status", StatusHandler).Methods("GET")
-	muxHttp.HandleFunc("/Result", ResultHandler).Methods("POST")
+	muxHttp.HandleFunc("/status", StatusHandler).Methods("GET")
+	muxHttp.HandleFunc("/result", ResultHandler).Methods("POST")
 
 	srv := &http.Server{
 		Handler:      muxHttp,
@@ -35,17 +36,32 @@ func StartProcess(m *CustomTableModel) {
 	log.Fatal(srv.ListenAndServe())
 }
 
+type Status struct {
+	Status string `json:"status"`
+}
+type Response struct {
+	Response string `json:"result"`
+}
+
 func StatusHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Running")
+	js, _ := json.MarshalIndent(&Status{"Running"}, "", "	")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 func ResultHandler(w http.ResponseWriter, r *http.Request) {
 
 	body, _ := ioutil.ReadAll(r.Body)
-	strBody := string(body)
+	var result Response
+	json.Unmarshal(body, &result)
 
-	dataModel.recieved(TableItem{strBody})
-	fmt.Fprint(w, strBody)
-	WriteToExcel(strBody)
+	dataModel.recieved(TableItem{result.Response})
+	js, _ := json.MarshalIndent(result, "", "	")
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+
+	WriteToExcel(result.Response)
 }
 
 var fileName string = "sample.xlsx"
